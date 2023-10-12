@@ -26,10 +26,11 @@ jobs:
     # - name: Install dependencies
       # run: pip install -r requirements.txt
 
-    - id: 'auth'
+    - id: oidc
       name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v1
       with:
+        token_format: id_token
         create_credentials_file: true
         workload_identity_provider: 'projects/490090145490/locations/global/workloadIdentityPools/colgate-pool/providers/colgate-provider'
         service_account: 'github-actions-deployer@nifty-kayak-401516.iam.gserviceaccount.com'
