@@ -7,6 +7,7 @@ on:
 
 jobs:
   deploy:
+    # Allow the job to fetch a GitHub ID token
     permissions:
       id-token: write
       contents: read
@@ -15,21 +16,22 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.11
+    # - name: Set up Python
+      # uses: actions/setup-python@v2
+      # with:
+        # python-version: 3.11
 
-    - name: Install dependencies
-      run: pip install -r requirements.txt
+    # - name: Install dependencies
+      # run: pip install -r requirements.txt
 
-    - name: Authenticate to Google Cloud
+    - id: 'auth'
+      name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v1
       with:
         create_credentials_file: true
-        workload_identity_provider: 'projects/490090145490/locations/global/workloadIdentityPools/colpal-pool/providers/colpal-provider'
+        workload_identity_provider: 'projects/490090145490/locations/global/workloadIdentityPools/colgate-pool/providers/colgate-provider'
         service_account: 'github-actions-deployer@nifty-kayak-401516.iam.gserviceaccount.com'
 
     - name: Deploy Cloud Functions
