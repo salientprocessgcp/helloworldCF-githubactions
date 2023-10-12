@@ -1,28 +1,35 @@
-name: Deploy Cloud Function
+name: Deployment
 
-on:
-  push:
-    branches:
-      - main
+# on commit push, run job
+on: [ push ]
 
 jobs:
-  deploy:
+  run:
+    # worker runs on latest ubuntu
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      # checkout to our repository so we have access to the source code
+      - uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
+      # the actual deployment to google
+      - name: Cloud Functions Deploy
+        uses: google-github-actions/deploy-cloud-functions@v1
         with:
-          python-version: 3.11  # Use the version you need
-
-      - name: Deploy Cloud Function
-        run: |
-          gcloud functions deploy hello-world \
-            --runtime python311 \
-            --trigger-http \
-            --entry-point hello_http
-        env:
-          CLOUDSDK_CORE_DISABLE_PROMPTS: 1
+          credentials: ${{ secrets.GCP_SA_KEY }}
+          name: python-hello-world-cf
+          description: Test python cloud function # nullable
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          region: us-central1
+          source_dir: .
+          # name of our function in our main.py file, defaults to the resource name suffix 
+          entry_point: hello_http
+          # runtime to use for the function
+          runtime: python311
+          # the function execution timeout
+          timeout: 60
+          # the maximum number of instances for the function.
+          max_instances: 1
+          # optional configs, see google-cloud-actions/deploy-cloud-functions for full reference
+          # list of key-value pairs to set as environment variables in the form KEY1=VALUE1,KEY2=VALUE2.
+#       env_vars: # optional
