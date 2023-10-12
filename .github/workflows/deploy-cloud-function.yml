@@ -7,8 +7,12 @@ on:
 
 jobs:
   deploy:
+    permissions:
+      id-token: write
+      contents: read
+    
     runs-on: ubuntu-latest
-
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -21,10 +25,12 @@ jobs:
     - name: Install dependencies
       run: pip install -r requirements.txt
 
-    - name: Authenticate with Google Cloud
-      env:
-        GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-      run: gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v1
+      with:
+        create_credentials_file: true
+        workload_identity_provider: 'projects/490090145490/locations/global/workloadIdentityPools/colpal-pool/providers/colpal-provider'
+        service_account: 'github-actions-deployer@nifty-kayak-401516.iam.gserviceaccount.com'
 
     - name: Deploy Cloud Functions
       run: |
