@@ -14,14 +14,6 @@ jobs:
     steps:
       # checkout to our repository so we have access to the source code
       - uses: actions/checkout@v3
-      
-      - id: auth
-        name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v1
-        with:
-          create_credentials_file: true
-          workload_identity_provider: 'projects/490090145490/locations/global/workloadIdentityPools/colpal-pool/providers/colpal-provider'
-          service_account: 'github-actions-deployer@nifty-kayak-401516.iam.gserviceaccount.com'
 
       # the actual deployment to google
       - name: Cloud Functions Deploy
@@ -29,6 +21,7 @@ jobs:
         with:
           name: python-hello-world-cf
           description: Test python cloud function # nullable
+          credentials: ${{ secrets.GCP_SA_KEY }}
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           region: us-central1
           # name of our function in our main.py file, defaults to the resource name suffix 
