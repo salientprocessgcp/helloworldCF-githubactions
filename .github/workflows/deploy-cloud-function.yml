@@ -1,37 +1,39 @@
-name: Deployment
+name: Deploy Cloud Functions
 
-# on commit push, run job
-on: [ push ]
+on:
+  push:
+    branches:
+      - main # You can adjust this to your preferred branch
 
 jobs:
-  run:
-    permissions:
-      id-token: write
-      contents: read
-    # worker runs on latest ubuntu
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # checkout to our repository so we have access to the source code
-      - uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      # the actual deployment to google
-      - name: Cloud Functions Deploy
-        uses: google-github-actions/deploy-cloud-functions@v0.1.2
-        with:
-          credentials: ${{ secrets.GCP_SA_KEY }}
-          name: python-hello-world-cf
-          description: Test python cloud function # nullable
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          region: us-central1
-          # name of our function in our main.py file, defaults to the resource name suffix 
-          entry_point: hello_http
-          # runtime to use for the function
-          runtime: python311
-          # the function execution timeout
-          timeout: 60
-          # the maximum number of instances for the function.
-          max_instances: 1
-          # optional configs, see google-cloud-actions/deploy-cloud-functions for full reference
-          # list of key-value pairs to set as environment variables in the form KEY1=VALUE1,KEY2=VALUE2.
-#       env_vars: # optional
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.11
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Authenticate with Google Cloud
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+      run: gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+
+    - name: Deploy Cloud Functions
+      run: |
+        gcloud functions deploy hello-world \
+          --runtime python311 \
+          --trigger-http \
+          --region us-central1
+          --entry-point hello_http
+          --allow-unauthenticated # Modify this based on your function configuration
+        gcloud functions add-iam-policy-binding hello-world \
+          --member "serviceAccount:github-actions-deployer@nifty-kayak-401516.iam.gserviceaccount.com" \
+          --role "roles/cloudfunctions.invoker"
