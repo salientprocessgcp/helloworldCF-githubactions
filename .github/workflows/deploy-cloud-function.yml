@@ -18,26 +18,27 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
     
-    # the actual deployment to google
-    - name: Cloud Functions Deploy
-      uses: google-github-actions/deploy-cloud-functions@v1
-      with:
-        credentials_json: ${{ secrets.GCP_SA_KEY }}
-        name: python-hello-world-cf
-        description: Test python cloud function # nullable
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
-        region: us-central1
-          # name of our function in our main.py file, defaults to the resource name suffix 
-        entry_point: hello_http
-          # runtime to use for the function
-        runtime: python311
-          # the function execution timeout
-        timeout: 60
-          # the maximum number of instances for the function.
-        max_instances: 1
-          # optional configs, see google-cloud-actions/deploy-cloud-functions for full reference
-          # list of key-value pairs to set as environment variables in the form KEY1=VALUE1,KEY2=VALUE2.
-#       env_vars: # optional
+    # # the actual deployment to google
+    # - name: Cloud Functions Deploy
+      # uses: google-github-actions/deploy-cloud-functions@v1
+      # with:
+        # credentials_json: ${{ secrets.GCP_SA_KEY }}
+        # name: python-hello-world-cf
+        # description: Test python cloud function # nullable
+        # project_id: ${{ secrets.GCP_PROJECT_ID }}
+        # region: us-central1
+          # # name of our function in our main.py file, defaults to the resource name suffix 
+        # entry_point: hello_http
+          # # runtime to use for the function
+        # runtime: python311
+          # # the function execution timeout
+        # timeout: 60
+          # # the maximum number of instances for the function.
+        # max_instances: 1
+          # # optional configs, see google-cloud-actions/deploy-cloud-functions for full reference
+          # # list of key-value pairs to set as environment variables in the form KEY1=VALUE1,KEY2=VALUE2.
+# #       env_vars: # optional
+
     # - name: Set up Python
       # uses: actions/setup-python@v2
       # with:
@@ -46,22 +47,22 @@ jobs:
     # - name: Install dependencies
       # run: pip install -r requirements.txt
 
-    # - id: auth
-      # name: Authenticate to Google Cloud
-      # uses: google-github-actions/auth@v1
-      # with:
-        # create_credentials_file: true
-        # workload_identity_provider: 'projects/490090145490/locations/global/workloadIdentityPools/colgate-pool/providers/colgate-provider'
-        # service_account: 'github-actions-deployer@nifty-kayak-401516.iam.gserviceaccount.com'
+    - id: auth
+      name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v1
+      with:
+        create_credentials_file: true
+        workload_identity_provider: 'projects/490090145490/locations/global/workloadIdentityPools/colgate-pool/providers/colgate-provider'
+        service_account: 'github-actions-deployer@nifty-kayak-401516.iam.gserviceaccount.com'
 
-    # - name: Deploy Cloud Functions
-      # run: |
-        # gcloud functions deploy hello-world \
-          # --runtime python311 \
-          # --trigger-http \
-          # --region us-central1 \
-          # --entry-point hello_http \
-          # --allow-unauthenticated # Modify this based on your function configuration
-        # gcloud functions add-iam-policy-binding hello-world \
-          # --member "serviceAccount:github-actions-deployer@nifty-kayak-401516.iam.gserviceaccount.com" \
-          # --role "roles/cloudfunctions.invoker"
+    - name: Deploy Cloud Functions
+      run: |
+        gcloud functions deploy hello-world \
+          --runtime python311 \
+          --trigger-http \
+          --region us-central1 \
+          --entry-point hello_http \
+          --allow-unauthenticated # Modify this based on your function configuration
+        gcloud functions add-iam-policy-binding hello-world \
+          --member "serviceAccount:github-actions-deployer@nifty-kayak-401516.iam.gserviceaccount.com" \
+          --role "roles/cloudfunctions.invoker"
