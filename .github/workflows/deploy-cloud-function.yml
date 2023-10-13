@@ -8,9 +8,9 @@ on:
 jobs:
   deploy:
     # Allow the job to fetch a GitHub ID token
-    # permissions:
-      # id-token: write
-      # contents: read
+    permissions:
+      id-token: write
+      contents: read
     
     runs-on: ubuntu-latest
     
